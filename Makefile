@@ -1,18 +1,26 @@
+SRCDIR    = cassandra
+SCRIPTDIR = scripts
+
 all: egg
 
-egg: src scripts/Cassandra-remote
+egg: $(SRCDIR) scripts/Cassandra-remote
 	python setup.py bdist_egg
 
-src/cassandra/Cassandra-remote: src
-src: src/gen-py
-	mv $^/* $@
-	rmdir $^
+$(SRCDIR)/Cassandra-remote: $(SRCDIR)
+$(SRCDIR): $(SRCDIR)/gen-py
+	mv $^/cassandra/* $@
 
-scripts/Cassandra-remote: src/cassandra/Cassandra-remote
-	mv $^ $@
+scripts/Cassandra-remote: $(SRCDIR)/Cassandra-remote
+	mkdir -p $(SCRIPTDIR)
+	sed -e s/'import Cassandra'/'from cassandra import Cassandra'/ \
+		-e s/'from ttypes import '/'from cassandra.ttypes import '/ \
+		< $^ > $@
+	chmod --reference $^ $@
+	rm $^
 
-src/gen-py: cassandra.thrift
-	thrift -gen py -o $(shell dirname $@) $^
+$(SRCDIR)/gen-py: cassandra.thrift
+	mkdir -p $(SRCDIR)
+	thrift -o $(shell dirname $@) -gen py:new_style=True  $^
 
 clean:
-	rm -rf src/* scripts/Cassandra-remote build dist *.egg-info
+	rm -rf $(SRCDIR) $(SCRIPTDIR) build dist *.egg-info

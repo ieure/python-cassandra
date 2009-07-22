@@ -1,5 +1,5 @@
 *.egg-info
-src/*
-scripts/*
+cassandra
+scripts
 build
 dist
