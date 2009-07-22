@@ -12,7 +12,7 @@ Installation
 Usage
 =====
 
-    from cassandra import Cassandra
+    from cassandra.Cassandra import *
     # Get the first 100 results from Table['key'][‘ColumnFamily']
     print get_slice_args('Table', 'Key', ColumnParent('ColumnFamily'), '', '',
                          True, 100)
