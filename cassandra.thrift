@@ -26,6 +26,11 @@ namespace py cassandra
 namespace php cassandra
 namespace perl Cassandra
 
+# Thrift.rb has a bug where top-level modules that include modules 
+# with the same name are not properly referenced, so we can't do
+# Cassandra::Cassandra::Client.
+namespace rb CassandraThrift
+
 #
 # structures
 #
@@ -58,12 +63,6 @@ struct BatchMutationSuper {
 
 typedef list<map<string, string>>   ResultSet
 
-struct CqlResult {
-   1: i32                           error_code, // 0 - success
-   2: string                        error_txt,
-   3: ResultSet                     result_set,
-}
-
 #
 # Exceptions
 #
@@ -88,11 +87,11 @@ exception UnavailableException {
 # service api
 #
 
-enum ConsistencyLevel { 
-    ZERO = 0, 
-    ONE = 1, 
-    QUORUM = 2, 
-    ALL = 3, 
+enum ConsistencyLevel {
+    ZERO = 0,
+    ONE = 1,
+    QUORUM = 2,
+    ALL = 3,
 }
 
 struct ColumnParent {
@@ -103,32 +102,35 @@ struct ColumnParent {
 struct ColumnPath {
     3: string          column_family,
     4: optional binary super_column,
-    5: binary          column,
-}
-
-struct SuperColumnPath {
-    3: string          column_family,
-    4: binary          super_column,
-}
-
-struct ColumnPathOrParent {
-    3: string          column_family,
-    4: optional binary super_column,
     5: optional binary column,
+}
+
+struct SliceRange {
+    1: binary          start,
+    2: binary          finish,
+    3: bool            reversed=0,
+    4: i32             count=100,
+}
+
+struct SlicePredicate {
+    1: optional list<binary> column_names,
+    2: optional SliceRange   slice_range,
+}
+
+struct ColumnOrSuperColumn {
+    1: optional Column column,
+    2: optional SuperColumn super_column,
 }
 
 
 service Cassandra {
-  list<Column> get_slice_by_names(1:string keyspace, 2:string key, 3:ColumnParent column_parent, 4:list<binary> column_names, 5:ConsistencyLevel consistency_level=1)
-  throws (1: InvalidRequestException ire, 2: NotFoundException nfe),
-  
-  list<Column> get_slice(1:string keyspace, 2:string key, 3:ColumnParent column_parent, 4:binary start, 5:binary finish, 6:bool is_ascending, 7:i32 count=100, 8:ConsistencyLevel consistency_level=1)
+  list<ColumnOrSuperColumn> get_slice(1:string keyspace, 2:string key, 3:ColumnParent column_parent, 4:SlicePredicate predicate, 5:ConsistencyLevel consistency_level=1)
   throws (1: InvalidRequestException ire, 2: NotFoundException nfe),
 
-  Column       get_column(1:string keyspace, 2:string key, 3:ColumnPath column_path, 4:ConsistencyLevel consistency_level=1)
+  ColumnOrSuperColumn get(1:string keyspace, 2:string key, 3:ColumnPath column_path, 4:ConsistencyLevel consistency_level=1)
   throws (1: InvalidRequestException ire, 2: NotFoundException nfe),
 
-  i32            get_column_count(1:string keyspace, 2:string key, 3:ColumnParent column_parent, 5:ConsistencyLevel consistency_level=1)
+  i32 get_count(1:string keyspace, 2:string key, 3:ColumnParent column_parent, 5:ConsistencyLevel consistency_level=1)
   throws (1: InvalidRequestException ire),
 
   void     insert(1:string keyspace, 2:string key, 3:ColumnPath column_path, 4:binary value, 5:i64 timestamp, 6:ConsistencyLevel consistency_level=0)
@@ -137,23 +139,14 @@ service Cassandra {
   void     batch_insert(1:string keyspace, 2:BatchMutation batch_mutation, 3:ConsistencyLevel consistency_level=0)
   throws (1: InvalidRequestException ire, 2: UnavailableException ue),
 
-  void           remove(1:string keyspace, 2:string key, 3:ColumnPathOrParent column_path_or_parent, 4:i64 timestamp, 5:ConsistencyLevel consistency_level=0)
+  void           remove(1:string keyspace, 2:string key, 3:ColumnPath column_path, 4:i64 timestamp, 5:ConsistencyLevel consistency_level=0)
   throws (1: InvalidRequestException ire, 2: UnavailableException ue),
-
-  list<SuperColumn> get_slice_super(1:string keyspace, 2:string key, 3:string column_family, 4:binary start, 5:binary finish, 6:bool is_ascending, 7:i32 count=100, 8:ConsistencyLevel consistency_level=1)
-  throws (1: InvalidRequestException ire),
-
-  list<SuperColumn> get_slice_super_by_names(1:string keyspace, 2:string key, 3:string column_family, 4:list<binary> super_column_names, 5:ConsistencyLevel consistency_level=1)
-  throws (1: InvalidRequestException ire),
-
-  SuperColumn  get_super_column(1:string keyspace, 2:string key, 3:SuperColumnPath super_column_path, 4:ConsistencyLevel consistency_level=1)
-  throws (1: InvalidRequestException ire, 2: NotFoundException nfe),
 
   void     batch_insert_super_column(1:string keyspace, 2:BatchMutationSuper batch_mutation_super, 3:ConsistencyLevel consistency_level=0)
   throws (1: InvalidRequestException ire, 2: UnavailableException ue),
 
   # range query: returns matching keys
-  list<string>   get_key_range(1:string keyspace, 2:string column_family, 3:string start="", 4:string finish="", 5:i32 count=100) 
+  list<string>   get_key_range(1:string keyspace, 2:string column_family, 3:string start="", 4:string finish="", 5:i32 count=100)
   throws (1: InvalidRequestException ire),
 
   /////////////////////////////////////////////////////////////////////////////////////
@@ -170,8 +163,5 @@ service Cassandra {
   // describe specified keyspace
   map<string, map<string, string>>  describe_keyspace(1:string keyspace)
   throws (1: NotFoundException nfe),
-
-  // execute a CQL query
-  CqlResult    execute_query(1:string query)
 }
 
