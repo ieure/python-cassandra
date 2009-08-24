@@ -3,3 +3,8 @@ cassandra
 scripts
 build
 dist
+bin
+lib
+include
+gen-*
+.Python
