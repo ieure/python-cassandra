@@ -9,7 +9,7 @@
 from setuptools import setup, find_packages
 
 setup(name="Cassandra",
-      version='svn807431',
+      version='svn808045',
       description="Thrift client for Cassandra",
       url="http://incubator.apache.org/cassandra/",
       packages=find_packages(exclude=['ez_setup', 'examples', 'tests']),
