@@ -23,5 +23,9 @@ $(SRCDIR)/gen-py: cassandra.thrift
 	mkdir -p $(SRCDIR)
 	thrift -o $(shell dirname $@) -gen py:new_style=True  $^
 
+update:
+	@echo "Updating to: $(shell svn info $(INTERFACE) | grep ^Last\ Changed\ Rev | cut -d: -f2)"
+	svn cat $(INTERFACE) > $(shell basename $(INTERFACE))
+
 clean:
 	rm -rf $(SRCDIR) $(SCRIPTDIR) build dist *.egg-info
