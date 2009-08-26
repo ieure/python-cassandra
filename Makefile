@@ -1,5 +1,6 @@
 SRCDIR    = cassandra
 SCRIPTDIR = scripts
+INTERFACE = https://svn.apache.org/repos/asf/incubator/cassandra/trunk/interface/cassandra.thrift
 
 all: egg
 
