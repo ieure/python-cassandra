@@ -2,10 +2,13 @@ SRCDIR    = cassandra
 SCRIPTDIR = scripts
 INTERFACE = https://svn.apache.org/repos/asf/incubator/cassandra/trunk/interface/cassandra.thrift
 
-all: egg
+all: sdist egg
 
 egg: $(SRCDIR) scripts/Cassandra-remote
 	python setup.py bdist_egg
+
+sdist: $(SRCDIR) scripts/Cassandra-remote
+	python setup.py sdist
 
 $(SRCDIR)/Cassandra-remote: $(SRCDIR)
 $(SRCDIR): $(SRCDIR)/gen-py
