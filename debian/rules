@@ -1,0 +1,19 @@
+#!/usr/bin/make -f
+
+DEB_PYTHON_SYSTEM := pysupport
+
+include /usr/share/cdbs/1/rules/buildcore.mk
+include /usr/share/cdbs/1/rules/debhelper.mk
+include /usr/share/cdbs/1/class/python-distutils.mk
+include /usr/share/cdbs/1/rules/simple-patchsys.mk
+
+DEB_PYTHON_INSTALL_ARGS_ALL += --single-version-externally-managed --install-lib usr/share/python-support/lazyboy
+# hack around CDBS bug -- see #373678
+DEB_PYTHON_INSTALL_ARGS := ${DEB_PYTHON_INSTALL_ARGS_ALL}
+
+UPSTREAM_VERSION=$(shell dpkg-parsechangelog | grep ^Version: | cut -d ' ' -f 2 | cut -d '-' -f 1)
+PYVER=$(shell python -V 2>&1 | cut -d ' ' -f 2 | cut -d . -f 1-2)
+
+clean::
+	# hack (CDBS bug -- see #300149)
+	-rm -rf build

@@ -1,0 +1,5 @@
+python-cassandra (0.4.0-1) unstable; urgency=low
+
+  * Debianized.
+
+ -- Ian Eure <ian@digg.com>  Mon, 28 Sep 2009 13:50:56 -0700
