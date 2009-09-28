@@ -1,34 +1,35 @@
 SRCDIR    = cassandra
+GENDIR    = tmp
 SCRIPTDIR = scripts
 INTERFACE = https://svn.apache.org/repos/asf/incubator/cassandra/trunk/interface/cassandra.thrift
 
-all: sdist egg
+all: $(SRCDIR) $(SCRIPTDIR)/Cassandra-remote
 
-egg: $(SRCDIR) scripts/Cassandra-remote
+egg: all
 	python setup.py bdist_egg
 
-sdist: $(SRCDIR) scripts/Cassandra-remote
+sdist: all
 	python setup.py sdist
 
 $(SRCDIR)/Cassandra-remote: $(SRCDIR)
-$(SRCDIR): $(SRCDIR)/gen-py
-	mv $^/cassandra/* $@
+$(SRCDIR): $(GENDIR)/gen-py
+	mkdir -p $@
+	cp -R $^/cassandra/* $@
 
-scripts/Cassandra-remote: $(SRCDIR)/Cassandra-remote
+$(SCRIPTDIR)/Cassandra-remote: $(SRCDIR)/Cassandra-remote
 	mkdir -p $(SCRIPTDIR)
 	sed -e s/'import Cassandra'/'from cassandra import Cassandra'/ \
 		-e s/'from ttypes import '/'from cassandra.ttypes import '/ \
 		< $^ > $@
 	chmod --reference $^ $@
-	rm $^
 
-$(SRCDIR)/gen-py: cassandra.thrift
-	mkdir -p $(SRCDIR)
-	thrift -o $(shell dirname $@) -gen py:new_style=True  $^
+$(GENDIR)/gen-py: cassandra.thrift
+	-mkdir -p $(GENDIR)
+	thrift -o $(GENDIR) -gen py:new_style=True  $^
 
 update:
 	@echo "Updating to: $(shell svn info $(INTERFACE) | grep ^Last\ Changed\ Rev | cut -d: -f2)"
 	svn cat $(INTERFACE) > $(shell basename $(INTERFACE))
 
 clean:
-	rm -rf $(SRCDIR) $(SCRIPTDIR) build dist *.egg-info
+	rm -rf $(GENDIR) $(SRCDIR) $(SCRIPTDIR) gen-* build dist *.egg-info
