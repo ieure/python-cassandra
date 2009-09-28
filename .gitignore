@@ -8,3 +8,7 @@ lib
 include
 gen-*
 .Python
+debian/python-cassandra*
+debian/stamp-*
+debian/files
+python-build-stamp*
