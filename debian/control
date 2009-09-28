@@ -2,7 +2,7 @@ Source: python-cassandra
 Section: python
 Priority: optional
 Maintainer: Ian Eure <ian@digg.com>
-Build-Depends: cdbs (>= 0.4.41), debhelper (>= 5.0.37.1), python-setuptools (>= 0.6a9-1)
+Build-Depends: cdbs (>= 0.4.41), debhelper (>= 5.0.37.1), python-setuptools (>= 0.6a9-1), thrift-compiler
 Build-Depends-Indep: python-dev, python-support (>= 0.2.3)
 Standards-Version: 3.7.2
 XS-Python-Version: all
@@ -10,7 +10,6 @@ XS-Python-Version: all
 Package: python-cassandra
 Architecture: all
 XB-Python-Version: ${python:Versions}
-Build-Depends: thrift-compiler
 Depends: ${python:Depends}, python-thrift
 Provides: ${python:Provides}
 Description: Cassandra bindings for Python
