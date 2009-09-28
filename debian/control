@@ -10,6 +10,7 @@ XS-Python-Version: all
 Package: python-cassandra
 Architecture: all
 XB-Python-Version: ${python:Versions}
+Build-Depends: thrift-compiler
 Depends: ${python:Depends}, python-thrift
 Provides: ${python:Provides}
 Description: Cassandra bindings for Python
