@@ -7,7 +7,6 @@ include /usr/share/cdbs/1/rules/debhelper.mk
 include /usr/share/cdbs/1/class/python-distutils.mk
 include /usr/share/cdbs/1/rules/simple-patchsys.mk
 
-DEB_PYTHON_INSTALL_ARGS_ALL += --single-version-externally-managed --install-lib usr/share/python-support/lazyboy
 # hack around CDBS bug -- see #373678
 DEB_PYTHON_INSTALL_ARGS := ${DEB_PYTHON_INSTALL_ARGS_ALL}
 
